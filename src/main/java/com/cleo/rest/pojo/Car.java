@@ -13,4 +13,18 @@ public class Car {
   public void setId(UUID id) {
     this.id = id;
   }
+  
+  public static class Builder {
+    
+    private final Car car = new Car();
+    
+    public Builder id(UUID id) {
+      car.id = id;
+      return this;
+    }
+    
+    public Car build() {
+      return car;
+    }
+  }
 }
