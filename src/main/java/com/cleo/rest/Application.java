@@ -18,7 +18,7 @@ public class Application {
     jerseyServlet.setInitOrder(0);
 
     // Tells the Jersey Servlet which REST service/class to load.
-    jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", EntryPoint.class.getCanonicalName());
+    jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", HelloWorld.class.getCanonicalName());
 
     try {
       server.start();

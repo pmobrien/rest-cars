@@ -4,14 +4,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-@Path("/entry-point")
-public class EntryPoint {
+@Path("/hello-world")
+public class HelloWorld {
 
   @GET
-  @Path("test")
   @Produces(MediaType.TEXT_PLAIN)
-  public String test() {
-    return "Hello World";
+  public Response helloWorld() {
+    return Response.ok("Hello World").build();
   }
 }
