@@ -39,11 +39,25 @@ public class CarsWebService implements ICarsWebService {
   
   @Override
   public Response getAll() {
-
     return Response.ok(
         cars
     ).build();
   }
+
+  @Override
+  public Response getCarById(String id) {
+
+    Car myCar = cars.stream()
+        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .findFirst()
+        .get();
+
+    return Response.ok(
+      myCar
+    ).build();
+  }
+
+
 }
 
 
