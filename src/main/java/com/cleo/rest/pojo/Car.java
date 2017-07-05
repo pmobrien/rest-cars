@@ -8,6 +8,7 @@ public class Car {
   private UUID id;
   private String make;
   private String model;
+  private String color;
   private int year;
 
 
@@ -22,6 +23,10 @@ public class Car {
 
   public String getModel() {
     return this.model;
+  }
+
+  public String getColor() {
+    return this.color;
   }
 
   public int getYear() {
@@ -41,6 +46,10 @@ public class Car {
 
   public void setModel(String model) {
     this.model = model;
+  }
+
+  public void setColor(String color) {
+    this.color = color;
   }
 
   public void setYear(int year) {
@@ -67,6 +76,11 @@ public class Car {
 
     public Builder model(String model) {
       car.model = model;
+      return this;
+    }
+
+    public Builder color(String color) {
+      car.color = color;
       return this;
     }
 
