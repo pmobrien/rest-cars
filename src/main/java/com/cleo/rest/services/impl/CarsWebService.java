@@ -13,18 +13,38 @@ public class CarsWebService implements ICarsWebService {
   private final static List<Car> cars = Lists.newArrayList(
       new Car.Builder()
           .id(UUID.randomUUID())
+          .make("Toyota")
+          .model("Camry")
+          .year(2010)
           .build(),
       new Car.Builder()
           .id(UUID.randomUUID())
+          .make("Honda")
+          .model("CRV")
+          .year(2007)
+          .build(),
+      new Car.Builder()
+          .id(UUID.randomUUID())
+          .make("Buick")
+          .model("Encore")
+          .year(2017)
+          .build(),
+      new Car.Builder()
+          .id(UUID.randomUUID())
+          .make("Buick")
+          .model("Enclave")
+          .year(20013)
           .build()
   );
   
   @Override
   public Response getAll() {
+
     return Response.ok(
-        new Car.Builder()
-            .id(UUID.randomUUID())
-            .build()
+        cars
     ).build();
   }
 }
+
+
+
