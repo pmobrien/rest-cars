@@ -40,12 +40,15 @@ public class CarsWebService implements ICarsWebService {
           .model("Enclave")
           .color("Blue")
           .year(2013)
+          .build(),
+      new Car.Builder()
+          .id(UUID.randomUUID())
+          .make("Toyota")
+          .model("Prius")
+          .color("Red")
+          .year(2011)
           .build()
   );
-
-
-
-
 
 
   @Override
@@ -73,6 +76,64 @@ public class CarsWebService implements ICarsWebService {
     cars.add(car);
     return Response.created(new URI("http://localhost:8080/api/cars/" + car.getId())).build();
   }
+
+  @Override
+  public Response deleteCarById(String id) throws Exception{
+    Car myCar = cars.stream()
+        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .findFirst()
+        .get();
+
+    return Response.ok(
+        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " " + myCar.getModel() + " has been deleted!"
+    ).build();
+  }
+
+  @Override
+  public Response purchaseCarById(String id) throws Exception{
+    Car myCar = cars.stream()
+        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .findFirst()
+        .get();
+
+
+    return Response.ok(
+        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " " + myCar.getModel() + " has been purchased!"
+    ).build();
+  }
+
+  @Override
+  public Response updateCarById(String id, Car updateCar) throws Exception{
+
+    Car myCar = cars.stream()
+        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .findFirst()
+        .get();
+
+    myCar.setMake(updateCar.getMake());
+    myCar.setModel(updateCar.getModel());
+    myCar.setColor(updateCar.getColor());
+    myCar.setYear(updateCar.getYear());
+
+    return Response.ok(
+        myCar
+    ).build();
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
