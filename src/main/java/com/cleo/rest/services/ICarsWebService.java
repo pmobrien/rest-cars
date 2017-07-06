@@ -44,23 +44,6 @@ public interface ICarsWebService {
   Response updateCarById(@PathParam("carId") String id, Car updateCar) throws Exception;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Get a specific car (maybe by color,
 
 
