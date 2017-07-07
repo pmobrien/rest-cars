@@ -1,6 +1,7 @@
 package com.cleo.rest.services;
 import com.cleo.rest.pojo.Car;
 
+import javax.print.attribute.standard.MediaPrintableArea;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -17,7 +18,7 @@ public interface ICarsWebService {
   @GET
   @Path("/{carId}")
   @Produces(MediaType.APPLICATION_JSON)
-  Response getCarById(@PathParam("carId") String id) throws Exception;
+  Response getCarById(@PathParam("carId") String id);
 
   // POSTs a new car to the list "cars"
   @POST
@@ -28,23 +29,28 @@ public interface ICarsWebService {
   @DELETE
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/{carId}")
-  Response deleteCarById(@PathParam("carId") String id) throws Exception;
+  Response deleteCarById(@PathParam("carId") String id);
 
   // Purchases a car (DELETEs from the list "cars"
   @DELETE
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/{carId}/buy")
-  Response purchaseCarById(@PathParam("carId") String id) throws Exception;
+  Response purchaseCarById(@PathParam("carId") String id);
 
   // Modify the information about a car (PUT)
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/{carId}")
-  Response updateCarById(@PathParam("carId") String id, Car updateCar) throws Exception;
+  Response updateCarById(@PathParam("carId") String id, Car updateCar);
 
 
-  // Get a specific car (maybe by color,
+  // Get a specific car (maybe by color, model, make?
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/filterYear")
+  Response orderCarsByYear();
+
 
 
 

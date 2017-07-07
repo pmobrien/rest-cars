@@ -5,6 +5,7 @@ import com.cleo.rest.services.ICarsWebService;
 import com.google.common.collect.Lists;
 
 import java.net.URI;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
@@ -78,7 +79,7 @@ public class CarsWebService implements ICarsWebService {
   }
 
   @Override
-  public Response deleteCarById(String id) throws Exception{
+  public Response deleteCarById(String id) {
     Car myCar = cars.stream()
         .filter(car -> UUID.fromString(id).equals(car.getId()))
         .findFirst()
@@ -90,7 +91,7 @@ public class CarsWebService implements ICarsWebService {
   }
 
   @Override
-  public Response purchaseCarById(String id) throws Exception{
+  public Response purchaseCarById(String id) {
     Car myCar = cars.stream()
         .filter(car -> UUID.fromString(id).equals(car.getId()))
         .findFirst()
@@ -103,7 +104,7 @@ public class CarsWebService implements ICarsWebService {
   }
 
   @Override
-  public Response updateCarById(String id, Car updateCar) throws Exception{
+  public Response updateCarById(String id, Car updateCar) {
 
     Car myCar = cars.stream()
         .filter(car -> UUID.fromString(id).equals(car.getId()))
@@ -120,8 +121,20 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
+  @Override
+  public Response orderCarsByYear() {
+
+    Comparator<Car> byYear = Comparator.comparing(Car::getYear);
+
+    return Response.ok(
+        cars.stream()
+            .sorted(byYear)
+    ).build();
+  }
 
 
+  // If I want to return a list in a different order, take in whatever param to be specified (color),
+  // using stream, filter to match the param, and return that new filtered list
 
 
 
