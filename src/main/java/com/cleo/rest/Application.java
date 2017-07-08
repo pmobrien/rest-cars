@@ -2,6 +2,7 @@ package com.cleo.rest;
 
 import com.cleo.rest.services.impl.CarsWebService;
 import com.cleo.rest.services.impl.HelloWorldWebService;
+import com.cleo.rest.exceptions.UncaughtExceptionMapper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -20,6 +21,7 @@ public class Application {
                 new ResourceConfig()
                     .register(HelloWorldWebService.class)
                     .register(CarsWebService.class)
+                    .register(UncaughtExceptionMapper.class)
             )
         ),
         "/*"
