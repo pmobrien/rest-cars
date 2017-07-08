@@ -9,6 +9,14 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class UncaughtExceptionMapper implements ExceptionMapper<Throwable> {
 
+  /**
+   * If it's a WebApplicationException (or any child class of), convert it to a JSON error message and retain the
+   * original error code. Otherwise, return a 500.
+   * 
+   * @param t The uncaught exception.
+   * 
+   * @return The uncaught WebApplicationException as JSON, or a 500.
+   */
   @Override
   public Response toResponse(Throwable t) {
     t.printStackTrace(System.out);
