@@ -1,5 +1,6 @@
 package com.cleo.rest.services.impl;
 
+import com.cleo.rest.exceptions.InvalidIdException;
 import com.cleo.rest.pojo.Car;
 import com.cleo.rest.services.ICarsWebService;
 import com.google.common.collect.Lists;
@@ -8,7 +9,11 @@ import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+
 
 public class CarsWebService implements ICarsWebService {
 
@@ -52,15 +57,112 @@ public class CarsWebService implements ICarsWebService {
   );
 
 
+  // Go through error scenarios for different endpoints
+  // bad id's -> null (making a class extending web application exception
+  //
+  // InvalidIdException
+  // NotFoundExceptionClass (404) -> same package as badRequest
+
+  // WebApplicationException status code and string message
+
   @Override
-  public Response getAll() {
+  public Response getAll(String filter, String sort) {
+
+    if(filter.equals("make")) {
+      Comparator<Car> byMake = Comparator.comparing(Car::getMake);
+      if(sort.equals("asc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byMake)
+                .collect(Collectors.toList())
+        ).build();
+      }
+      else if(sort.equals("desc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byMake.reversed())
+                .collect(Collectors.toList())
+        ).build();
+      }
+    }
+
+    if(filter.equals("model")) {
+      Comparator<Car> byModel = Comparator.comparing(Car::getModel);
+      if(sort.equals("asc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byModel)
+                .collect(Collectors.toList())
+        ).build();
+      }
+      else if(sort.equals("desc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byModel.reversed())
+                .collect(Collectors.toList())
+        ).build();
+      }
+    }
+
+    if(filter.equals("color")) {
+      Comparator<Car> byColor = Comparator.comparing(Car::getColor);
+      if(sort.equals("asc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byColor)
+                .collect(Collectors.toList())
+        ).build();
+      }
+      else if(sort.equals("desc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byColor.reversed())
+                .collect(Collectors.toList())
+        ).build();
+      }
+    }
+
+    if(filter.equals("year")) {
+      Comparator<Car> byYear = Comparator.comparing(Car::getYear);
+      if(sort.equals("asc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byYear)
+                .collect(Collectors.toList())
+        ).build();
+      }
+      else if(sort.equals("desc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byYear.reversed())
+                .collect(Collectors.toList())
+        ).build();
+
+      }
+    }
+
     return Response.ok(
         cars
     ).build();
   }
 
+  /*
+      Exception cases:
+        -User can enter an invalid id (404)
+        -User can enter a null id, or a bad request (400)
+     */
   @Override
   public Response getCarById(String id) {
+
+    // If the car is not found:
+    if(cars.stream()
+        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .findFirst()
+        .get() == null) {
+      throw new InvalidIdException("You have passed in a null ID", Response.Status.NOT_FOUND);
+    }
+
+
     Car myCar = cars.stream()
         .filter(car -> UUID.fromString(id).equals(car.getId()))
         .findFirst()
@@ -71,6 +173,11 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
+
+  /*
+    Exception cases:
+      -User enters a null car (400)
+   */
   @Override
   public Response addCar(Car car) throws Exception{
     car.setId(UUID.randomUUID());
@@ -78,6 +185,13 @@ public class CarsWebService implements ICarsWebService {
     return Response.created(new URI("http://localhost:8080/api/cars/" + car.getId())).build();
   }
 
+
+
+  /*
+    Exception cases:
+      -User can enter an invalid id (404)
+      -User can enter a null id, or a bad request (400)
+   */
   @Override
   public Response deleteCarById(String id) {
     Car myCar = cars.stream()
@@ -90,6 +204,13 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
+
+
+  /*
+    Exception cases:
+      -User can enter an invalid id (404)
+      -User can enter a null id, or a bad request (400)
+   */
   @Override
   public Response purchaseCarById(String id) {
     Car myCar = cars.stream()
@@ -103,24 +224,33 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
+
+
+  /*
+    Exception cases:
+      -User can enter an invalid id (404)
+      -User can enter a null id, or a bad request (400)
+      -user can enter a null car (400)
+   */
   @Override
-  public Response updateCarById(String id, Car updateCar) {
+  public Response updateCarById(String id, Car car) {
 
     Car myCar = cars.stream()
-        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .filter(c -> UUID.fromString(id).equals(c.getId()))
         .findFirst()
         .get();
 
-    myCar.setMake(updateCar.getMake());
-    myCar.setModel(updateCar.getModel());
-    myCar.setColor(updateCar.getColor());
-    myCar.setYear(updateCar.getYear());
+    myCar.setMake(car.getMake());
+    myCar.setModel(car.getModel());
+    myCar.setColor(car.getColor());
+    myCar.setYear(car.getYear());
 
     return Response.ok(
         myCar
     ).build();
   }
 
+  // WON'T NEED THIS IN THE FUTURE
   @Override
   public Response orderCarsByYear() {
 
@@ -129,27 +259,11 @@ public class CarsWebService implements ICarsWebService {
     return Response.ok(
         cars.stream()
             .sorted(byYear)
+            .collect(Collectors.toList())
     ).build();
   }
 
 
   // If I want to return a list in a different order, take in whatever param to be specified (color),
   // using stream, filter to match the param, and return that new filtered list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-

@@ -12,7 +12,7 @@ public interface ICarsWebService {
   // Default URL to get all cars in the list "cars"
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  Response getAll();
+  Response getAll(@DefaultValue("") @QueryParam("filter") String filter, @DefaultValue("") @QueryParam("sort") String sort);
 
   // GETs a car as specified by an id (string)
   @GET
@@ -42,7 +42,7 @@ public interface ICarsWebService {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/{carId}")
-  Response updateCarById(@PathParam("carId") String id, Car updateCar);
+  Response updateCarById(@PathParam("carId") String id, Car car);
 
 
   // Get a specific car (maybe by color, model, make?
@@ -50,9 +50,5 @@ public interface ICarsWebService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/filterYear")
   Response orderCarsByYear();
-
-
-
-
 
 }
