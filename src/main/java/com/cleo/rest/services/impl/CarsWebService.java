@@ -3,6 +3,7 @@ package com.cleo.rest.services.impl;
 import com.cleo.rest.exceptions.InvalidIdException;
 import com.cleo.rest.pojo.Car;
 import com.cleo.rest.services.ICarsWebService;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import java.net.URI;
@@ -10,8 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 
@@ -65,6 +65,7 @@ public class CarsWebService implements ICarsWebService {
 
   // WebApplicationException status code and string message
 
+  // How to handle bad input for filter & sort? Or even throw exception, since it will default?
   @Override
   public Response getAll(String filter, String sort) {
 
@@ -86,7 +87,7 @@ public class CarsWebService implements ICarsWebService {
       }
     }
 
-    if(filter.equals("model")) {
+    else if(filter.equals("model")) {
       Comparator<Car> byModel = Comparator.comparing(Car::getModel);
       if(sort.equals("asc")) {
         return Response.ok(
@@ -104,7 +105,7 @@ public class CarsWebService implements ICarsWebService {
       }
     }
 
-    if(filter.equals("color")) {
+    else if(filter.equals("color")) {
       Comparator<Car> byColor = Comparator.comparing(Car::getColor);
       if(sort.equals("asc")) {
         return Response.ok(
@@ -122,7 +123,7 @@ public class CarsWebService implements ICarsWebService {
       }
     }
 
-    if(filter.equals("year")) {
+    else if(filter.equals("year")) {
       Comparator<Car> byYear = Comparator.comparing(Car::getYear);
       if(sort.equals("asc")) {
         return Response.ok(
@@ -146,6 +147,26 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
+
+
+  // private helper getCar
+  private Car findCar(String id) {
+
+    if (!(cars.stream()
+          .filter(car -> UUID.fromString(id).equals(car.getId()))
+          .findFirst())
+        .isPresent()) {
+      return null;
+    }
+
+    return cars.stream()
+        .filter(car -> UUID.fromString(id).equals(car.getId()))
+        .findFirst()
+        .get();
+  }
+
+
+
   /*
       Exception cases:
         -User can enter an invalid id (404)
@@ -154,19 +175,19 @@ public class CarsWebService implements ICarsWebService {
   @Override
   public Response getCarById(String id) {
 
-    // If the car is not found:
-    if(cars.stream()
-        .filter(car -> UUID.fromString(id).equals(car.getId()))
-        .findFirst()
-        .get() == null) {
-      throw new InvalidIdException("You have passed in a null ID", Response.Status.NOT_FOUND);
+    if(Strings.isNullOrEmpty(id)) {
+      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
+    }
+    try{
+      UUID.fromString(id);
+    }catch(Exception ex){
+      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
     }
 
-
-    Car myCar = cars.stream()
-        .filter(car -> UUID.fromString(id).equals(car.getId()))
-        .findFirst()
-        .get();
+    Car myCar = findCar(id);
+    if(myCar == null) {
+      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
+    }
 
     return Response.ok(
       myCar
