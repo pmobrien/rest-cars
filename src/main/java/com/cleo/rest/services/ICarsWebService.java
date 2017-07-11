@@ -43,12 +43,4 @@ public interface ICarsWebService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/{carId}")
   Response updateCarById(@PathParam("carId") String id, Car car);
-
-
-  // Get a specific car (maybe by color, model, make?
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("/filterYear")
-  Response orderCarsByYear();
-
 }

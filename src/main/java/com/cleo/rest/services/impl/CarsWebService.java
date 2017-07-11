@@ -11,10 +11,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 
+
+/**
+ * REST API exercise to perform CRUD operations on a list of cars.
+ *
+ *
+ * @author agesmer
+ * @since 7/10/2017
+ */
 public class CarsWebService implements ICarsWebService {
 
   // Don't worry about persisting anything, just do CRUD operations on this list.
@@ -56,18 +63,36 @@ public class CarsWebService implements ICarsWebService {
           .build()
   );
 
-
-  // Go through error scenarios for different endpoints
-  // bad id's -> null (making a class extending web application exception
-  //
-  // InvalidIdException
-  // NotFoundExceptionClass (404) -> same package as badRequest
-
-  // WebApplicationException status code and string message
-
   // How to handle bad input for filter & sort? Or even throw exception, since it will default?
+  /**
+   * Gets all cars. Default display is in ascending order of when cars were added to list. Optional query params are
+   * filter and sort.
+   *
+   *
+   * @param filter -> List cars by a specific attribute (id, make, model, color, year).
+   * @param sort -> Specify order of cars based on filter to be in ascending (asc) or descending (desc) order.
+   * @return -> Display of cars based on user's query parameters.
+   */
   @Override
   public Response getAll(String filter, String sort) {
+
+    if(filter.equals("id")) {
+      Comparator<Car> byId = Comparator.comparing(Car::getId);
+      if(sort.equals("asc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byId)
+                .collect(Collectors.toList())
+        ).build();
+      }
+      else if(sort.equals("desc")) {
+        return Response.ok(
+            cars.stream()
+                .sorted(byId.reversed())
+                .collect(Collectors.toList())
+        ).build();
+      }
+    }
 
     if(filter.equals("make")) {
       Comparator<Car> byMake = Comparator.comparing(Car::getMake);
@@ -87,7 +112,7 @@ public class CarsWebService implements ICarsWebService {
       }
     }
 
-    else if(filter.equals("model")) {
+    if(filter.equals("model")) {
       Comparator<Car> byModel = Comparator.comparing(Car::getModel);
       if(sort.equals("asc")) {
         return Response.ok(
@@ -105,7 +130,7 @@ public class CarsWebService implements ICarsWebService {
       }
     }
 
-    else if(filter.equals("color")) {
+    if(filter.equals("color")) {
       Comparator<Car> byColor = Comparator.comparing(Car::getColor);
       if(sort.equals("asc")) {
         return Response.ok(
@@ -123,7 +148,7 @@ public class CarsWebService implements ICarsWebService {
       }
     }
 
-    else if(filter.equals("year")) {
+    if(filter.equals("year")) {
       Comparator<Car> byYear = Comparator.comparing(Car::getYear);
       if(sort.equals("asc")) {
         return Response.ok(
@@ -147,9 +172,12 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
-
-
-  // private helper getCar
+  /***
+   * Finds specific car based on id passed in.
+   *
+   * @param id
+   * @return Car specified from id, if no car has such id, returns NULL.
+   */
   private Car findCar(String id) {
 
     if (!(cars.stream()
@@ -158,7 +186,6 @@ public class CarsWebService implements ICarsWebService {
         .isPresent()) {
       return null;
     }
-
     return cars.stream()
         .filter(car -> UUID.fromString(id).equals(car.getId()))
         .findFirst()
@@ -166,12 +193,12 @@ public class CarsWebService implements ICarsWebService {
   }
 
 
-
-  /*
-      Exception cases:
-        -User can enter an invalid id (404)
-        -User can enter a null id, or a bad request (400)
-     */
+  /***
+   * Displays car specified by id.
+   *
+   * @param id
+   * @return -> Display of car based on id.
+   */
   @Override
   public Response getCarById(String id) {
 
@@ -195,9 +222,12 @@ public class CarsWebService implements ICarsWebService {
   }
 
 
-  /*
-    Exception cases:
-      -User enters a null car (400)
+  /***
+   * Adds a new car to the list of cars.
+   *
+   * @param car
+   * @return -> Response verifying that a car has been added to list of cars.
+   * @throws Exception
    */
   @Override
   public Response addCar(Car car) throws Exception{
@@ -207,59 +237,89 @@ public class CarsWebService implements ICarsWebService {
   }
 
 
-
-  /*
-    Exception cases:
-      -User can enter an invalid id (404)
-      -User can enter a null id, or a bad request (400)
+  /***
+   * Deletes car from list of cars as specified by id.
+   *
+   * @param id
+   * @return -> Response verifying that the car has been deleted from list of cars.
    */
   @Override
   public Response deleteCarById(String id) {
-    Car myCar = cars.stream()
-        .filter(car -> UUID.fromString(id).equals(car.getId()))
-        .findFirst()
-        .get();
+
+    if(Strings.isNullOrEmpty(id)) {
+      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
+    }
+    try{
+      UUID.fromString(id);
+    }catch(Exception ex){
+      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
+    }
+
+    Car myCar = findCar(id);
+    if(myCar == null) {
+      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
+    }
 
     return Response.ok(
-        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " " + myCar.getModel() + " has been deleted!"
+        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
+            + myCar.getModel() + " has been deleted!"
     ).build();
   }
 
 
-
-  /*
-    Exception cases:
-      -User can enter an invalid id (404)
-      -User can enter a null id, or a bad request (400)
+  /***
+   * Purchases car as specified from id, removing the car from the list of cars.
+   *
+   * @param id
+   * @return -> Response that car has been purchased and removed from list of cars.
    */
   @Override
   public Response purchaseCarById(String id) {
-    Car myCar = cars.stream()
-        .filter(car -> UUID.fromString(id).equals(car.getId()))
-        .findFirst()
-        .get();
 
+    if(Strings.isNullOrEmpty(id)) {
+      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
+    }
+    try{
+      UUID.fromString(id);
+    }catch(Exception ex){
+      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
+    }
+
+    Car myCar = findCar(id);
+    if(myCar == null) {
+      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
+    }
 
     return Response.ok(
-        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " " + myCar.getModel() + " has been purchased!"
+        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
+            + myCar.getModel() + " has been purchased!"
     ).build();
   }
 
 
-
-  /*
-    Exception cases:
-      -User can enter an invalid id (404)
-      -User can enter a null id, or a bad request (400)
-      -user can enter a null car (400)
+  /***
+   * Updates car by id, taking in a car with desired attributes to be updated.
+   *
+   * @param id
+   * @param car
+   * @return -> Returns the updated car as specified by id.
    */
   @Override
   public Response updateCarById(String id, Car car) {
 
-    Car myCar = cars.stream()
-        .filter(c -> UUID.fromString(id).equals(c.getId()))
-        .findFirst()
-        .get();
+    if(Strings.isNullOrEmpty(id)) {
+      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
+    }
+    try{
+      UUID.fromString(id);
+    }catch(Exception ex){
+      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
+    }
+
+    Car myCar = findCar(id);
+    if(myCar == null) {
+      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
+    }
 
     myCar.setMake(car.getMake());
     myCar.setModel(car.getModel());
@@ -270,21 +330,4 @@ public class CarsWebService implements ICarsWebService {
         myCar
     ).build();
   }
-
-  // WON'T NEED THIS IN THE FUTURE
-  @Override
-  public Response orderCarsByYear() {
-
-    Comparator<Car> byYear = Comparator.comparing(Car::getYear);
-
-    return Response.ok(
-        cars.stream()
-            .sorted(byYear)
-            .collect(Collectors.toList())
-    ).build();
-  }
-
-
-  // If I want to return a list in a different order, take in whatever param to be specified (color),
-  // using stream, filter to match the param, and return that new filtered list
 }
