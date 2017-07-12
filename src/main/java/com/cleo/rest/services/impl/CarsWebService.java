@@ -12,8 +12,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
-
-
 /**
  * REST API exercise to perform CRUD operations on a list of cars.
  *
@@ -170,6 +168,11 @@ public class CarsWebService implements ICarsWebService {
     return Response.created(new URI("http://localhost:8080/api/cars/" + car.getId())).build();
   }
 
+
+  public String toString(Car car) {
+    return car.getYear() + " " + car.getColor() + " " + car.getMake() + " " + car.getModel();
+  }
+
   /***
    * Deletes car from list of cars as specified by id.
    *
@@ -183,9 +186,11 @@ public class CarsWebService implements ICarsWebService {
 
     Car myCar = findCar(id);
 
+    cars.remove(myCar);
+
     return Response.ok(
-        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
-            + myCar.getModel() + " has been deleted!"
+
+        toString(myCar) + " has been deleted!"
     ).build();
   }
 
@@ -202,17 +207,24 @@ public class CarsWebService implements ICarsWebService {
 
     Car myCar = findCar(id);
 
+    cars.remove(myCar);
+
     return Response.ok(
-        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
-            + myCar.getModel() + " has been purchased!"
+        toString(myCar) + " has been purchased!"
     ).build();
   }
 
-  /*
+
   private Car updateCar(Car oldCar, Car newCar) {
-    return null;
+
+    oldCar.setMake(newCar.getMake());
+    oldCar.setModel(newCar.getModel());
+    oldCar.setColor(newCar.getColor());
+    oldCar.setYear(newCar.getYear());
+
+    return oldCar;
   }
-  */
+
 
   /***
    * Updates car by id, taking in a car with desired attributes to be updated.
@@ -226,36 +238,19 @@ public class CarsWebService implements ICarsWebService {
 
     validateId(id);
 
-    Car myCar = findCar(id);
-
-    myCar.setMake(car.getMake());
-    myCar.setModel(car.getModel());
-    myCar.setColor(car.getColor());
-    myCar.setYear(car.getYear());
-
     return Response.ok(
-        myCar
+        updateCar(findCar(id), car)
     ).build();
   }
 
   @Override
   public Response patchCarById(String id, Car car) {
 
+    car.setId(UUID.randomUUID());
+
+    validateId(id);
+
     /*
-    if(Strings.isNullOrEmpty(id)) {
-      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
-    }
-    try{
-      UUID.fromString(id);
-    }catch(Exception ex){
-      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
-    }
-
-    Car myCar = findCar(id);
-    if(myCar == null) {
-      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
-    }
-
     // Should check if any fields are null... then that means don't update it?
     if(car.getMake() != null) {
       myCar.setMake(car.getMake());
