@@ -5,11 +5,10 @@ import com.cleo.rest.pojo.Car;
 import com.cleo.rest.services.ICarsWebService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+//import jdk.internal.util.xml.impl.Input;
 
 import java.net.URI;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
@@ -63,7 +62,14 @@ public class CarsWebService implements ICarsWebService {
           .build()
   );
 
-  // How to handle bad input for filter & sort? Or even throw exception, since it will default?
+  private final static Map<String, Comparator<Car>> map = new HashMap<String, Comparator<Car>>() {{
+    put("id", Comparator.comparing(Car::getId));
+    put("make", Comparator.comparing(Car::getMake));
+    put("model", Comparator.comparing(Car::getModel));
+    put("color", Comparator.comparing(Car::getColor));
+    put("year", Comparator.comparing(Car::getYear));
+  }};
+
   /**
    * Gets all cars. Default display is in ascending order of when cars were added to list. Optional query params are
    * filter and sort.
@@ -76,100 +82,43 @@ public class CarsWebService implements ICarsWebService {
   @Override
   public Response getAll(String filter, String sort) {
 
-    if(filter.equals("id")) {
-      Comparator<Car> byId = Comparator.comparing(Car::getId);
-      if(sort.equals("asc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byId)
-                .collect(Collectors.toList())
-        ).build();
-      }
-      else if(sort.equals("desc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byId.reversed())
-                .collect(Collectors.toList())
-        ).build();
-      }
-    }
-
-    if(filter.equals("make")) {
-      Comparator<Car> byMake = Comparator.comparing(Car::getMake);
-      if(sort.equals("asc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byMake)
-                .collect(Collectors.toList())
-        ).build();
-      }
-      else if(sort.equals("desc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byMake.reversed())
-                .collect(Collectors.toList())
-        ).build();
-      }
-    }
-
-    if(filter.equals("model")) {
-      Comparator<Car> byModel = Comparator.comparing(Car::getModel);
-      if(sort.equals("asc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byModel)
-                .collect(Collectors.toList())
-        ).build();
-      }
-      else if(sort.equals("desc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byModel.reversed())
-                .collect(Collectors.toList())
-        ).build();
-      }
-    }
-
-    if(filter.equals("color")) {
-      Comparator<Car> byColor = Comparator.comparing(Car::getColor);
-      if(sort.equals("asc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byColor)
-                .collect(Collectors.toList())
-        ).build();
-      }
-      else if(sort.equals("desc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byColor.reversed())
-                .collect(Collectors.toList())
-        ).build();
-      }
-    }
-
-    if(filter.equals("year")) {
-      Comparator<Car> byYear = Comparator.comparing(Car::getYear);
-      if(sort.equals("asc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byYear)
-                .collect(Collectors.toList())
-        ).build();
-      }
-      else if(sort.equals("desc")) {
-        return Response.ok(
-            cars.stream()
-                .sorted(byYear.reversed())
-                .collect(Collectors.toList())
-        ).build();
-
-      }
+    // Ascending order:
+    if(sort.equals("asc")) {
+      return Response.ok(
+          cars.stream()
+              .sorted(map.get(filter))
+              .collect(Collectors.toList())
+      ).build();
+    } // Descending order:
+    else if(sort.equals("desc")) {
+      return Response.ok(
+          cars.stream()
+              .sorted(map.get(filter).reversed())
+              .collect(Collectors.toList())
+      ).build();
     }
 
     return Response.ok(
         cars
     ).build();
+  }
+
+  /***
+   * Throws appropriate error corresponding to invalid id (null, invalid UUID, or no car with id).
+   * @param id
+   */
+  private void validateId(String id) {
+    if(Strings.isNullOrEmpty(id)) {
+      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
+    }
+    try{
+      UUID.fromString(id);
+    }catch(Exception ex){
+      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
+    }
+    if(findCar(id) == null) {
+      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
+    }
   }
 
   /***
@@ -179,7 +128,6 @@ public class CarsWebService implements ICarsWebService {
    * @return Car specified from id, if no car has such id, returns NULL.
    */
   private Car findCar(String id) {
-
     if (!(cars.stream()
           .filter(car -> UUID.fromString(id).equals(car.getId()))
           .findFirst())
@@ -192,7 +140,6 @@ public class CarsWebService implements ICarsWebService {
         .get();
   }
 
-
   /***
    * Displays car specified by id.
    *
@@ -202,25 +149,12 @@ public class CarsWebService implements ICarsWebService {
   @Override
   public Response getCarById(String id) {
 
-    if(Strings.isNullOrEmpty(id)) {
-      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
-    }
-    try{
-      UUID.fromString(id);
-    }catch(Exception ex){
-      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
-    }
-
-    Car myCar = findCar(id);
-    if(myCar == null) {
-      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
-    }
+    validateId(id);
 
     return Response.ok(
-      myCar
+        findCar(id)
     ).build();
   }
-
 
   /***
    * Adds a new car to the list of cars.
@@ -236,7 +170,6 @@ public class CarsWebService implements ICarsWebService {
     return Response.created(new URI("http://localhost:8080/api/cars/" + car.getId())).build();
   }
 
-
   /***
    * Deletes car from list of cars as specified by id.
    *
@@ -246,26 +179,15 @@ public class CarsWebService implements ICarsWebService {
   @Override
   public Response deleteCarById(String id) {
 
-    if(Strings.isNullOrEmpty(id)) {
-      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
-    }
-    try{
-      UUID.fromString(id);
-    }catch(Exception ex){
-      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
-    }
+    validateId(id);
 
     Car myCar = findCar(id);
-    if(myCar == null) {
-      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
-    }
 
     return Response.ok(
         cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
             + myCar.getModel() + " has been deleted!"
     ).build();
   }
-
 
   /***
    * Purchases car as specified from id, removing the car from the list of cars.
@@ -276,19 +198,9 @@ public class CarsWebService implements ICarsWebService {
   @Override
   public Response purchaseCarById(String id) {
 
-    if(Strings.isNullOrEmpty(id)) {
-      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
-    }
-    try{
-      UUID.fromString(id);
-    }catch(Exception ex){
-      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
-    }
+    validateId(id);
 
     Car myCar = findCar(id);
-    if(myCar == null) {
-      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
-    }
 
     return Response.ok(
         cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
@@ -296,6 +208,11 @@ public class CarsWebService implements ICarsWebService {
     ).build();
   }
 
+  /*
+  private Car updateCar(Car oldCar, Car newCar) {
+    return null;
+  }
+  */
 
   /***
    * Updates car by id, taking in a car with desired attributes to be updated.
@@ -307,6 +224,24 @@ public class CarsWebService implements ICarsWebService {
   @Override
   public Response updateCarById(String id, Car car) {
 
+    validateId(id);
+
+    Car myCar = findCar(id);
+
+    myCar.setMake(car.getMake());
+    myCar.setModel(car.getModel());
+    myCar.setColor(car.getColor());
+    myCar.setYear(car.getYear());
+
+    return Response.ok(
+        myCar
+    ).build();
+  }
+
+  @Override
+  public Response patchCarById(String id, Car car) {
+
+    /*
     if(Strings.isNullOrEmpty(id)) {
       throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
     }
@@ -321,13 +256,24 @@ public class CarsWebService implements ICarsWebService {
       throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
     }
 
-    myCar.setMake(car.getMake());
-    myCar.setModel(car.getModel());
-    myCar.setColor(car.getColor());
-    myCar.setYear(car.getYear());
+    // Should check if any fields are null... then that means don't update it?
+    if(car.getMake() != null) {
+      myCar.setMake(car.getMake());
+    }
+    if(car.getModel() != null) {
+      myCar.setModel(car.getModel());
+    }
+    if(car.getColor() != null) {
+      myCar.setColor(car.getColor());
+    }
+    if((Integer)car.getYear() != null) {
+      myCar.setYear(car.getYear());
+    }
+    */
 
     return Response.ok(
-        myCar
+        car
     ).build();
+
   }
 }

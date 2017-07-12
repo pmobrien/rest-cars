@@ -1,10 +1,13 @@
 package com.cleo.rest.services;
 import com.cleo.rest.pojo.Car;
 
+import com.cleo.rest.services.impl.PATCH;
+
 import javax.print.attribute.standard.MediaPrintableArea;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 
 @Path("/cars")
 public interface ICarsWebService {
@@ -43,4 +46,12 @@ public interface ICarsWebService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/{carId}")
   Response updateCarById(@PathParam("carId") String id, Car car);
+
+
+
+  @PATCH
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("/{carId}")
+  Response patchCarById(@PathParam("carId") String id, Car car);
+
 }
