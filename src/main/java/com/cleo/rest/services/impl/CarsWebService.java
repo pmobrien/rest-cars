@@ -3,6 +3,7 @@ package com.cleo.rest.services.impl;
 import com.cleo.rest.exceptions.InvalidIdException;
 import com.cleo.rest.pojo.Car;
 import com.cleo.rest.services.ICarsWebService;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 //import jdk.internal.util.xml.impl.Input;
@@ -105,7 +106,8 @@ public class CarsWebService implements ICarsWebService {
    * Throws appropriate error corresponding to invalid id (null, invalid UUID, or no car with id).
    * @param id
    */
-  private void validateId(String id) {
+  @VisibleForTesting
+  protected void validateId(String id) {
     if(Strings.isNullOrEmpty(id)) {
       throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
     }
@@ -125,7 +127,8 @@ public class CarsWebService implements ICarsWebService {
    * @param id
    * @return Car specified from id, if no car has such id, returns NULL.
    */
-  private Car findCar(String id) {
+  @VisibleForTesting
+  protected Car findCar(String id) {
     if (!(cars.stream()
           .filter(car -> UUID.fromString(id).equals(car.getId()))
           .findFirst())
