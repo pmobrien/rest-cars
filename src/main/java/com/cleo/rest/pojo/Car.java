@@ -59,14 +59,25 @@ public class Car {
   // Other useful methods:
 
   // PUT
-  public void updateCar(Car oldCar, Car newCar) {
+  public Car updateCar(Car oldCar, Car newCar) {
 
     oldCar.setMake(newCar.getMake());
     oldCar.setModel(newCar.getModel());
     oldCar.setColor(newCar.getColor());
     oldCar.setYear(newCar.getYear());
 
+    return oldCar;
   }
+
+  public boolean equals(Car otherCar) {
+
+    return (getMake().equals(otherCar.getMake())
+            && getModel().equals(otherCar.getModel())
+            && getColor().equals(otherCar.getColor())
+            && getYear() == otherCar.getYear());
+
+  }
+
 
   public void patchCar(Car oldCar, Car newCar) {
 

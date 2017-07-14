@@ -33,8 +33,6 @@ public class CarsWebServiceTest {
     Mockito.verify(service).validateId(Matchers.anyString());
   }
 
-
-
   @Test(dataProvider = "testValidateIdDataProvider", expectedExceptions = InvalidIdException.class)
   public void testValidateId(String value) {
     Mockito.doCallRealMethod().when(service).validateId(Matchers.anyString());
@@ -56,12 +54,6 @@ public class CarsWebServiceTest {
   }
 
 
-  @Test
-  public void testGetCarById() {
-
-  }
-
-
   @Override
   public boolean equals(Object obj) {
     return super.equals(obj);
@@ -74,25 +66,5 @@ public class CarsWebServiceTest {
     } catch(Exception ex) {
       Assert.fail("shouldn't add null car", ex);
     }
-  }
-
-  @Test
-  public void testDeleteCarById() {
-
-  }
-
-  @Test
-  public void testPurchaseCarById() {
-
-  }
-
-  @Test
-  public void testUpdateCarById() {
-
-  }
-
-  @Test
-  public void testPatchCarById() {
-
   }
 }
