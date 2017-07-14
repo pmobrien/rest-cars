@@ -172,10 +172,6 @@ public class CarsWebService implements ICarsWebService {
   }
 
 
-  public String toString(Car car) {
-    return car.getYear() + " " + car.getColor() + " " + car.getMake() + " " + car.getModel();
-  }
-
   /***
    * Deletes car from list of cars as specified by id.
    *
@@ -192,8 +188,7 @@ public class CarsWebService implements ICarsWebService {
     cars.remove(myCar);
 
     return Response.ok(
-
-        toString(myCar) + " has been deleted!"
+        myCar.toString() + " has been deleted!"
     ).build();
   }
 
@@ -213,22 +208,9 @@ public class CarsWebService implements ICarsWebService {
     cars.remove(myCar);
 
     return Response.ok(
-        toString(myCar) + " has been purchased!"
+        myCar.toString() + " has been purchased!"
     ).build();
   }
-
-  // MOVE THIS OVER TO CAR, AS WELL AS TOSTRING()
-
-  private Car updateCar(Car oldCar, Car newCar) {
-
-    oldCar.setMake(newCar.getMake());
-    oldCar.setModel(newCar.getModel());
-    oldCar.setColor(newCar.getColor());
-    oldCar.setYear(newCar.getYear());
-
-    return oldCar;
-  }
-
 
   /***
    * Updates car by id, taking in a car with desired attributes to be updated.
@@ -242,36 +224,27 @@ public class CarsWebService implements ICarsWebService {
 
     validateId(id);
 
+    updateCarById(id, car);
     return Response.ok(
-        updateCar(findCar(id), car)
+        findCar(id)
     ).build();
   }
 
+
+  /***
+   *
+   * @param id
+   * @param car
+   * @return
+   */
   @Override
   public Response patchCarById(String id, Car car) {
 
-    car.setId(UUID.randomUUID());
-
     validateId(id);
 
-    /*
-    // Should check if any fields are null... then that means don't update it?
-    if(car.getMake() != null) {
-      myCar.setMake(car.getMake());
-    }
-    if(car.getModel() != null) {
-      myCar.setModel(car.getModel());
-    }
-    if(car.getColor() != null) {
-      myCar.setColor(car.getColor());
-    }
-    if((Integer)car.getYear() != null) {
-      myCar.setYear(car.getYear());
-    }
-    */
-
+    findCar(id).patchCar(findCar(id), car);
     return Response.ok(
-        car
+        findCar(id)
     ).build();
 
   }

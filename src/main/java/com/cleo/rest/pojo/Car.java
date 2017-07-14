@@ -56,7 +56,37 @@ public class Car {
     this.year = year;
   }
 
-  
+  // Other useful methods:
+
+  // PUT
+  public void updateCar(Car oldCar, Car newCar) {
+
+    oldCar.setMake(newCar.getMake());
+    oldCar.setModel(newCar.getModel());
+    oldCar.setColor(newCar.getColor());
+    oldCar.setYear(newCar.getYear());
+
+  }
+
+  public void patchCar(Car oldCar, Car newCar) {
+
+    if(newCar.getMake() != null) {
+      oldCar.setMake(newCar.getMake());
+    }
+    if(newCar.getModel() != null) {
+      oldCar.setModel(newCar.getModel());
+    }
+    if(newCar.getColor() != null) {
+      oldCar.setColor(newCar.getColor());
+    }
+    if((Integer)newCar.getYear() != null) {
+      oldCar.setYear(newCar.getYear());
+    }
+  }
+
+  public String toString() {
+    return getYear() + " " + getColor() + " " + getMake() + " " + getModel();
+  }
 
 
   // Builder class:
