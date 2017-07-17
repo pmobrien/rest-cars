@@ -227,7 +227,7 @@ public class CarsWebService implements ICarsWebService {
     Car myCar = findCar(id);
 
     return Response.ok(
-        myCar.updateCar(myCar, car)
+        myCar.updateCar(car)
     ).build();
   }
 

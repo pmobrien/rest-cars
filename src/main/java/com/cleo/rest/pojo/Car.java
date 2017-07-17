@@ -59,23 +59,41 @@ public class Car {
   // Other useful methods:
 
   // PUT
-  public Car updateCar(Car oldCar, Car newCar) {
+  public Car updateCar(Car newCar) {
 
-    oldCar.setMake(newCar.getMake());
-    oldCar.setModel(newCar.getModel());
-    oldCar.setColor(newCar.getColor());
-    oldCar.setYear(newCar.getYear());
+    this.setId(newCar.getId());
+    this.setMake(newCar.getMake());
+    this.setModel(newCar.getModel());
+    this.setColor(newCar.getColor());
+    this.setYear(newCar.getYear());
 
-    return oldCar;
+    return this;
   }
 
-  public boolean equals(Car otherCar) {
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Car)) return false;
 
-    return (getMake().equals(otherCar.getMake())
-            && getModel().equals(otherCar.getModel())
-            && getColor().equals(otherCar.getColor())
-            && getYear() == otherCar.getYear());
+    Car car = (Car) o;
 
+    if (getYear() != car.getYear()) return false;
+    if (!getId().equals(car.getId())) return false;
+    if (!getMake().equals(car.getMake())) return false;
+    if (!getModel().equals(car.getModel())) return false;
+    return getColor().equals(car.getColor());
+  }
+
+
+
+  @Override
+  public int hashCode() {
+    int result = getId().hashCode();
+    result = 31 * result + getMake().hashCode();
+    result = 31 * result + getModel().hashCode();
+    result = 31 * result + getColor().hashCode();
+    result = 31 * result + getYear();
+    return result;
   }
 
 

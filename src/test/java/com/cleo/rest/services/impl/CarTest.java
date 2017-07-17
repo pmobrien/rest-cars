@@ -1,6 +1,7 @@
 package com.cleo.rest.services.impl;
 
 import com.cleo.rest.pojo.Car;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
@@ -16,44 +17,57 @@ public class CarTest {
   @BeforeTest
   protected void beforeTest() {
 
-    // THROWS ERROR ->  Mockito.mock(Car.class);
+    // THROWS ERROR --> car = Mockito.mock(Car.class);
     car = new Car();
   }
 
-
-  @Test(dataProvider = "testToStringDataProvider")
-  public void testToString(Car someCar, String expected) {
-
-    Assert.assertEquals(someCar.toString(), expected);
-  }
-
   @Test(dataProvider = "testUpdateCarDataProvider")
-  public void testUpdateCar(Car someCar, boolean expectedResult) {
+  public void testUpdateCar(Car newCar, boolean expected) {
 
-    Assert.assertEquals(car.equals(someCar), expectedResult);
+    Car car = new Car.Builder()
+                  .make("Buick")
+                  .model("Encore")
+                  .color("White")
+                  .year(2017)
+                  .build();
+
+    Assert.assertEquals(car.updateCar(newCar).equals(newCar), expected);
   }
 
 
   @DataProvider(name = "testUpdateCarDataProvider")
   protected Object[][] testUpdateCarDataProvider() {
-    Car car1 = new Car(); // make this same as car
-    Car car2 = new Car(); // make this different than car
-    Car car3 = new Car(); // make this same as car
-
-    car1 = car1.updateCar(car1, car);
-
-    car2 = car2.updateCar(car2, car);
-    car2.setYear(2020);
-
-    car3 = car3.updateCar(car3, car);
 
     return new Object[][] {
-        { car1, true },
-        { car2, false },
-        { car3, true }
+        { new Car.Builder().make("Buick").model("Encore").color("White").year(2017), true },
+        { new Car.Builder().make("Buick").model("Encore").color("White").year(2017), true },
+        { new Car.Builder().make("Buick").model("Encore").color("White").year(2017), true }
     };
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+  @Test(dataProvider = "testToStringDataProvider")
+  public void testToString(Car someCar, String expected) {
+
+    Assert.assertEquals(someCar.toString(), expected);
+  }*/
+
+  /*
   @DataProvider(name = "testToStringDataProvider")
   protected  Object[][] testToStringDataProvider() {
     car.setColor("White");
@@ -65,15 +79,15 @@ public class CarTest {
     Car car2 = new Car();
     Car car3 = new Car();
 
-    car1 = car1.updateCar(car1, car);
+    car1 = car1.updateCar(car);
     car1.setMake("Ford");
     car1.setYear(1969);
 
-    car2 = car2.updateCar(car2, car);
+    car2 = car2.updateCar(car);
     car2.setYear(2020);
     car2.setMake("Chevy");
 
-    car3 = car3.updateCar(car3, car);
+    car3 = car3.updateCar(car);
     car3.setYear(1994);
     car3.setMake("VW");
 
@@ -83,4 +97,6 @@ public class CarTest {
         { car3, "1994 White VW Encore"}
     };
   }
+  */
+
 }
