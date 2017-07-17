@@ -78,7 +78,7 @@ public class Car {
     Car car = (Car) o;
 
     if (getYear() != car.getYear()) return false;
-    if (!getId().equals(car.getId())) return false;
+    //if (!getId().equals(car.getId())) return false;
     if (!getMake().equals(car.getMake())) return false;
     if (!getModel().equals(car.getModel())) return false;
     return getColor().equals(car.getColor());
