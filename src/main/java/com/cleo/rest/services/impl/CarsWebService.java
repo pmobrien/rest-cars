@@ -3,6 +3,7 @@ package com.cleo.rest.services.impl;
 import com.cleo.rest.exceptions.InvalidIdException;
 import com.cleo.rest.pojo.Car;
 import com.cleo.rest.services.ICarsWebService;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 //import jdk.internal.util.xml.impl.Input;
@@ -11,8 +12,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
-
-
 
 /**
  * REST API exercise to perform CRUD operations on a list of cars.
@@ -107,7 +106,8 @@ public class CarsWebService implements ICarsWebService {
    * Throws appropriate error corresponding to invalid id (null, invalid UUID, or no car with id).
    * @param id
    */
-  private void validateId(String id) {
+  @VisibleForTesting
+  protected void validateId(String id) {
     if(Strings.isNullOrEmpty(id)) {
       throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
     }
@@ -127,7 +127,8 @@ public class CarsWebService implements ICarsWebService {
    * @param id
    * @return Car specified from id, if no car has such id, returns NULL.
    */
-  private Car findCar(String id) {
+  @VisibleForTesting
+  protected Car findCar(String id) {
     if (!(cars.stream()
           .filter(car -> UUID.fromString(id).equals(car.getId()))
           .findFirst())
@@ -170,6 +171,7 @@ public class CarsWebService implements ICarsWebService {
     return Response.created(new URI("http://localhost:8080/api/cars/" + car.getId())).build();
   }
 
+
   /***
    * Deletes car from list of cars as specified by id.
    *
@@ -183,9 +185,10 @@ public class CarsWebService implements ICarsWebService {
 
     Car myCar = findCar(id);
 
+    cars.remove(myCar);
+
     return Response.ok(
-        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
-            + myCar.getModel() + " has been deleted!"
+        myCar.toString() + " has been deleted!"
     ).build();
   }
 
@@ -202,17 +205,12 @@ public class CarsWebService implements ICarsWebService {
 
     Car myCar = findCar(id);
 
+    cars.remove(myCar);
+
     return Response.ok(
-        cars.remove(myCar) + ", " + myCar.getYear() + " " + myCar.getColor() + " " + myCar.getMake() + " "
-            + myCar.getModel() + " has been purchased!"
+        myCar.toString() + " has been purchased!"
     ).build();
   }
-
-  /*
-  private Car updateCar(Car oldCar, Car newCar) {
-    return null;
-  }
-  */
 
   /***
    * Updates car by id, taking in a car with desired attributes to be updated.
@@ -228,51 +226,26 @@ public class CarsWebService implements ICarsWebService {
 
     Car myCar = findCar(id);
 
-    myCar.setMake(car.getMake());
-    myCar.setModel(car.getModel());
-    myCar.setColor(car.getColor());
-    myCar.setYear(car.getYear());
-
     return Response.ok(
-        myCar
+        myCar.updateCar(car)
     ).build();
   }
 
+
+  /***
+   *
+   * @param id
+   * @param car
+   * @return
+   */
   @Override
   public Response patchCarById(String id, Car car) {
 
-    /*
-    if(Strings.isNullOrEmpty(id)) {
-      throw new InvalidIdException("ID cannot be null or empty", Response.Status.BAD_REQUEST);
-    }
-    try{
-      UUID.fromString(id);
-    }catch(Exception ex){
-      throw new InvalidIdException("ID is not a valid UUID", Response.Status.BAD_REQUEST);
-    }
+    validateId(id);
 
-    Car myCar = findCar(id);
-    if(myCar == null) {
-      throw new InvalidIdException("No car with that ID", Response.Status.NOT_FOUND);
-    }
-
-    // Should check if any fields are null... then that means don't update it?
-    if(car.getMake() != null) {
-      myCar.setMake(car.getMake());
-    }
-    if(car.getModel() != null) {
-      myCar.setModel(car.getModel());
-    }
-    if(car.getColor() != null) {
-      myCar.setColor(car.getColor());
-    }
-    if((Integer)car.getYear() != null) {
-      myCar.setYear(car.getYear());
-    }
-    */
-
+    findCar(id).patchCar(findCar(id), car);
     return Response.ok(
-        car
+        findCar(id)
     ).build();
 
   }

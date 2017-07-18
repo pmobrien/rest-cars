@@ -56,7 +56,66 @@ public class Car {
     this.year = year;
   }
 
-  
+  // Other useful methods:
+
+  // PUT
+  public Car updateCar(Car newCar) {
+
+    this.setId(newCar.getId());
+    this.setMake(newCar.getMake());
+    this.setModel(newCar.getModel());
+    this.setColor(newCar.getColor());
+    this.setYear(newCar.getYear());
+
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Car)) return false;
+
+    Car car = (Car) o;
+
+    if (getYear() != car.getYear()) return false;
+    //if (!getId().equals(car.getId())) return false;
+    if (!getMake().equals(car.getMake())) return false;
+    if (!getModel().equals(car.getModel())) return false;
+    return getColor().equals(car.getColor());
+  }
+
+
+
+  @Override
+  public int hashCode() {
+    int result = getId().hashCode();
+    result = 31 * result + getMake().hashCode();
+    result = 31 * result + getModel().hashCode();
+    result = 31 * result + getColor().hashCode();
+    result = 31 * result + getYear();
+    return result;
+  }
+
+
+  public void patchCar(Car oldCar, Car newCar) {
+
+    if(newCar.getMake() != null) {
+      oldCar.setMake(newCar.getMake());
+    }
+    if(newCar.getModel() != null) {
+      oldCar.setModel(newCar.getModel());
+    }
+    if(newCar.getColor() != null) {
+      oldCar.setColor(newCar.getColor());
+    }
+    if((Integer)newCar.getYear() != null) {
+      oldCar.setYear(newCar.getYear());
+    }
+  }
+
+  public String toString() {
+    return getYear() + " " + getColor() + " " + getMake() + " " + getModel();
+  }
 
 
   // Builder class:
