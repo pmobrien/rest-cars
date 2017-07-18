@@ -68,3 +68,18 @@ public class CarTest {
     };
   }
 }
+
+
+// THINGS TO-DO:
+// PUT TOGETHER A PULL REQUEST
+/*
+  GO THROUGH README FILE ON GITHUB
+  ssh into VM, start harmony service
+  provision script in centos-dev
+
+
+ */
+
+
+
+
